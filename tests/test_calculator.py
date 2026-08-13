@@ -2,14 +2,21 @@ from vibe_coding import Calculator
 import pytest
 
 
-################### #
 # Calculator Tests 
-################### #
 def test_add():
     """더하기 테스트"""
     calc = Calculator()
 
     assert calc.add(2, 3) == 5
+
+def test_subtract():
+    """빼기 테스트"""
+    calc = Calculator()
+
+    assert calc.subtract(5, 3) == 2
+
+def test_multiply():
+    """곱하기 테스트"""
     calc = Calculator()
 
     assert calc.multiply(4, 3) == 12
