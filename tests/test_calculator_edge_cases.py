@@ -37,3 +37,9 @@ def test_divide_returns_float_for_exact_division():
 
     assert result == 2.0
     assert isinstance(result, float)
+
+def test_multiply_list_with_negative_count():
+    """리스트에 음수를 곱하면 에러 없이 빈 리스트가 되는 테스트"""
+    calc = Calculator()
+
+    assert calc.multiply([1, 2], -1) == []
