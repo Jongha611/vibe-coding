@@ -11,3 +11,6 @@ wheels/
 
 # macOS
 .DS_Store
+
+# TDD 훅이 기록하는 pytest 실행 상태
+.claude/.tdd-state.json

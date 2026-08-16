@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/tdd_guard.py\"",
+            "timeout": 15,
+            "statusMessage": "TDD: 테스트 선행 확인 중..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/tdd_pytest.py\"",
+            "timeout": 120,
+            "statusMessage": "TDD: pytest 실행 중..."
+          }
+        ]
+      }
+    ]
+  }
+}

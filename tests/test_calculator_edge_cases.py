@@ -43,3 +43,23 @@ def test_multiply_list_with_negative_count():
     calc = Calculator()
 
     assert calc.multiply([1, 2], -1) == []
+
+def test_subtract_type_error_int_and_str():
+    """정수와 문자열을 빼면 타입 에러가 발생하는 테스트"""
+    calc = Calculator()
+
+    with pytest.raises(TypeError):
+        calc.subtract(1, "a")
+
+def test_subtract_with_sets():
+    """집합을 빼면 차집합으로 동작하는 테스트"""
+    calc = Calculator()
+
+    assert calc.subtract({1, 2, 3}, {2, 3}) == {1}
+
+def test_subtract_float_precision():
+    """부동소수점 뺄셈에서 오차가 발생하는 테스트"""
+    calc = Calculator()
+
+    assert calc.subtract(0.3, 0.1) != 0.2
+    assert calc.subtract(0.3, 0.1) == pytest.approx(0.2)

@@ -35,7 +35,7 @@ def test_divide_by_zero():
         calc.divide(10, 0)
 
 def test_reuse_same_instance():
-    """같은 인스턴스로 여러 연산을 연속 수행해도 상태가 공유되지 않는지 테스트"""
+    """같은 인스턴스로 여러 연산을 연속 수행하는 테스트"""
     calc = Calculator()
 
     assert calc.add(1, 2) == 3
