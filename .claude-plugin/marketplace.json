@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "jongha-local",
+  "description": "로컬에서 만든 Claude Code 플러그인 모음",
+  "owner": {
+    "name": "Jongha611",
+    "email": "kimjongha611@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "tdd-python",
+      "source": "./plugins/tdd-python",
+      "description": "파이썬 TDD 강제 훅 + 유닛 테스트 작성 스킬",
+      "category": "testing"
+    }
+  ]
+}
