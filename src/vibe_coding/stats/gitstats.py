@@ -6,7 +6,7 @@ from datetime import datetime
 class GitStats:
 
     WEEKDAYS = ["월", "화", "수", "목", "금", "토", "일"]
-    LOG_FORMAT = "%H|%an|%aI"
+    LOG_FORMAT = "%H|%an|%ae|%aI"
 
     def month_start(self, now=None):
 
@@ -32,23 +32,39 @@ class GitStats:
 
         for line in log_text.splitlines():
             parts = line.split("|")
-            if len(parts) != 3:
+            if len(parts) != 4:
                 continue
 
-            commit_hash, author, date = parts
+            commit_hash, author, email, date = parts
             commits.append({
                 "hash": commit_hash,
                 "author": author,
+                "email": email,
                 "date": datetime.fromisoformat(date),
             })
 
         return commits
 
+    def _author_key(self, commit):
+        """집계 키. 이메일은 대소문자를 무시하고, 비어 있으면 이름으로 폴백한다."""
+
+        return commit["email"].strip().lower() or commit["author"]
+
     def by_author(self, commits):
 
-        counts = Counter(commit["author"] for commit in commits)
+        counts = Counter(self._author_key(commit) for commit in commits)
 
         return dict(sorted(counts.items(), key=lambda item: (-item[1], item[0])))
+
+    def author_names(self, commits):
+        """집계 키마다 출력에 쓸 대표 이름. git log 가 최신순이라 가장 최근 이름이 남는다."""
+
+        names = {}
+
+        for commit in commits:
+            names.setdefault(self._author_key(commit), commit["author"])
+
+        return names
 
     def by_weekday(self, commits):
 
@@ -69,9 +85,11 @@ class GitStats:
 
         print(f"총 커밋: {len(commits)}\n")
 
+        names = self.author_names(commits)
+
         print("작성자별")
-        for author, count in self.by_author(commits).items():
-            print(f"  {author}: {count}")
+        for email, count in self.by_author(commits).items():
+            print(f"  {names[email]}: {count}")
 
         print("\n요일별")
         for day, count in self.by_weekday(commits).items():

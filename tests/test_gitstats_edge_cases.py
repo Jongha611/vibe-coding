@@ -10,11 +10,12 @@ def test_parse_empty_log():
     assert gitstats.parse("") == []
 
 def test_parse_skips_broken_line():
-    """구분자가 빠진 줄은 건너뛰고 정상 줄만 남기는 테스트"""
+    """구분자가 빠졌거나 필드가 모자란 줄은 건너뛰는 테스트"""
     gitstats = GitStats()
     log = (
         "형식이 깨진 줄\n"
-        "aaa111|Jongha611|2026-08-24T10:00:00+09:00"
+        "bbb222|Jongha611|2026-08-25T14:30:00+09:00\n"
+        "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00"
     )
 
     commits = gitstats.parse(log)
@@ -27,6 +28,62 @@ def test_by_author_with_no_commits():
     gitstats = GitStats()
 
     assert gitstats.by_author([]) == {}
+
+def test_author_names_with_no_commits():
+    """커밋이 없으면 이름 매핑도 빈 dict 인 테스트"""
+    gitstats = GitStats()
+
+    assert gitstats.author_names([]) == {}
+
+def test_by_author_merges_same_email():
+    """이름이 달라도 이메일이 같으면 한 사람으로 합치는 테스트"""
+    gitstats = GitStats()
+    log = (
+        "aaa111|Jongha611|kim@example.com|2026-08-26T10:00:00+09:00\n"
+        "bbb222|Jongha|kim@example.com|2026-08-25T14:30:00+09:00"
+    )
+
+    commits = gitstats.parse(log)
+
+    assert gitstats.by_author(commits) == {"kim@example.com": 2}
+    assert gitstats.author_names(commits)["kim@example.com"] == "Jongha611"
+
+def test_by_author_separates_same_name():
+    """이름이 같아도 이메일이 다르면 따로 세는 테스트"""
+    gitstats = GitStats()
+    log = (
+        "aaa111|Jongha|one@example.com|2026-08-26T10:00:00+09:00\n"
+        "bbb222|Jongha|two@example.com|2026-08-25T14:30:00+09:00"
+    )
+
+    counts = gitstats.by_author(gitstats.parse(log))
+
+    assert counts == {"one@example.com": 1, "two@example.com": 1}
+
+def test_by_author_ignores_email_case():
+    """이메일 대소문자만 다르면 한 사람으로 합치는 테스트"""
+    gitstats = GitStats()
+    log = (
+        "aaa111|Jongha611|Kim@Example.com|2026-08-26T10:00:00+09:00\n"
+        "bbb222|Jongha|kim@example.com|2026-08-25T14:30:00+09:00"
+    )
+
+    commits = gitstats.parse(log)
+
+    assert gitstats.by_author(commits) == {"kim@example.com": 2}
+    assert gitstats.author_names(commits)["kim@example.com"] == "Jongha611"
+
+def test_by_author_falls_back_to_name_when_email_empty():
+    """이메일이 비어 있으면 이름으로 갈라 세는 테스트"""
+    gitstats = GitStats()
+    log = (
+        "aaa111|Bot A||2026-08-26T10:00:00+09:00\n"
+        "bbb222|Bot B||2026-08-25T14:30:00+09:00"
+    )
+
+    counts = gitstats.by_author(gitstats.parse(log))
+
+    assert counts == {"Bot A": 1, "Bot B": 1}
 
 def test_by_weekday_with_no_commits():
     """커밋이 없어도 요일 일곱 칸이 0으로 남는 테스트"""

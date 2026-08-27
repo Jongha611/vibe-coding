@@ -5,11 +5,11 @@ from datetime import datetime
 
 # GitStats Tests
 def test_parse():
-    """로그 한 줄을 해시·작성자·날짜로 나누는 테스트"""
+    """로그 한 줄을 해시·작성자·이메일·날짜로 나누는 테스트"""
     gitstats = GitStats()
     log = (
-        "aaa111|Jongha611|2026-08-24T10:00:00+09:00\n"
-        "bbb222|Somebody|2026-08-25T14:30:00+09:00"
+        "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00\n"
+        "bbb222|Somebody|some@example.com|2026-08-25T14:30:00+09:00"
     )
 
     commits = gitstats.parse(log)
@@ -17,29 +17,42 @@ def test_parse():
     assert len(commits) == 2
     assert commits[0]["hash"] == "aaa111"
     assert commits[0]["author"] == "Jongha611"
+    assert commits[0]["email"] == "kim@example.com"
     assert commits[1]["date"].year == 2026
 
 def test_by_author():
-    """작성자별 커밋 수를 많은 순으로 세는 테스트"""
+    """이메일별 커밋 수를 많은 순으로 세는 테스트"""
     gitstats = GitStats()
     log = (
-        "aaa111|Jongha611|2026-08-24T10:00:00+09:00\n"
-        "bbb222|Jongha611|2026-08-25T14:30:00+09:00\n"
-        "ccc333|Somebody|2026-08-26T09:15:00+09:00"
+        "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00\n"
+        "bbb222|Jongha611|kim@example.com|2026-08-25T14:30:00+09:00\n"
+        "ccc333|Somebody|some@example.com|2026-08-26T09:15:00+09:00"
     )
 
     counts = gitstats.by_author(gitstats.parse(log))
 
-    assert counts == {"Jongha611": 2, "Somebody": 1}
-    assert list(counts)[0] == "Jongha611"
+    assert counts == {"kim@example.com": 2, "some@example.com": 1}
+    assert list(counts)[0] == "kim@example.com"
+
+def test_author_names():
+    """이메일마다 출력에 쓸 대표 이름을 고르는 테스트"""
+    gitstats = GitStats()
+    log = (
+        "aaa111|Jongha611|kim@example.com|2026-08-26T10:00:00+09:00\n"
+        "bbb222|Somebody|some@example.com|2026-08-25T14:30:00+09:00"
+    )
+
+    names = gitstats.author_names(gitstats.parse(log))
+
+    assert names == {"kim@example.com": "Jongha611", "some@example.com": "Somebody"}
 
 def test_by_weekday():
     """요일별 커밋 수를 월~일 순서로 세는 테스트"""
     gitstats = GitStats()
     log = (
-        "aaa111|Jongha611|2026-08-24T10:00:00+09:00\n"
-        "bbb222|Jongha611|2026-08-25T14:30:00+09:00\n"
-        "ccc333|Somebody|2026-08-26T09:15:00+09:00"
+        "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00\n"
+        "bbb222|Jongha611|kim@example.com|2026-08-25T14:30:00+09:00\n"
+        "ccc333|Somebody|some@example.com|2026-08-26T09:15:00+09:00"
     )
 
     counts = gitstats.by_weekday(gitstats.parse(log))
@@ -53,7 +66,7 @@ def test_collect(monkeypatch):
     commands = []
 
     class FakeResult:
-        stdout = "aaa111|Jongha611|2026-08-24T10:00:00+09:00"
+        stdout = "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00"
 
     def fake_run(command, **kwargs):
         commands.append(command)
@@ -63,7 +76,7 @@ def test_collect(monkeypatch):
 
     log = gitstats.collect()
 
-    assert log == "aaa111|Jongha611|2026-08-24T10:00:00+09:00"
+    assert log == "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00"
     assert commands[0][0] == "git"
     assert commands[0][1] == "log"
 
@@ -71,9 +84,9 @@ def test_run_prints_stats(monkeypatch, capsys):
     """수집한 로그로 작성자별·요일별 통계를 출력하는 테스트"""
     gitstats = GitStats()
     log = (
-        "aaa111|Jongha611|2026-08-24T10:00:00+09:00\n"
-        "bbb222|Jongha611|2026-08-25T14:30:00+09:00\n"
-        "ccc333|Somebody|2026-08-26T09:15:00+09:00"
+        "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00\n"
+        "bbb222|Jongha611|kim@example.com|2026-08-25T14:30:00+09:00\n"
+        "ccc333|Somebody|some@example.com|2026-08-26T09:15:00+09:00"
     )
     monkeypatch.setattr(GitStats, "collect", lambda self: log)
 
@@ -113,7 +126,7 @@ def test_collect_limits_to_this_month(monkeypatch):
 def test_run_prints_month_header(monkeypatch, capsys):
     """어느 달의 통계인지 머리글에 드러내는 테스트"""
     gitstats = GitStats()
-    log = "aaa111|Jongha611|2026-08-24T10:00:00+09:00"
+    log = "aaa111|Jongha611|kim@example.com|2026-08-24T10:00:00+09:00"
     monkeypatch.setattr(GitStats, "collect", lambda self: log)
     monkeypatch.setattr(GitStats, "month_start", lambda self: datetime(2026, 8, 1))
 
