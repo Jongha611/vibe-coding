@@ -1,12 +1,15 @@
-"""TDD 훅 두 개가 공유하는 경로와 Red 상태 파일 입출력.
+"""
+# TDD 훅 두 개가 공유하는 경로와 Red 상태 파일 입출력 모듈. #
 
 tdd_pytest.py 가 pytest 를 돌린 뒤 상태를 쓰고, tdd_guard.py 가 그걸 읽어
 "지금 실패 중인 테스트가 있는가"(Red)를 판단한다.
 """
 
+
 import json
 import os
 from pathlib import Path
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_DIR = PROJECT_ROOT / "src"
