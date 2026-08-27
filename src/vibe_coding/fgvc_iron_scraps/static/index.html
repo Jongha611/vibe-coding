@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고철 이미지 분석</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card-bg: #ffffff;
+    --text: #1a1d21;
+    --text-secondary: #5f6673;
+    --border: #e1e4e8;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-text: #ffffff;
+    --success-bg: #e6f6ec;
+    --success-text: #146c2e;
+    --success-border: #a8dfb9;
+    --error-bg: #fdecec;
+    --error-text: #b3261e;
+    --error-border: #f3b4b0;
+    --shadow: rgba(0, 0, 0, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --card-bg: #1e2126;
+      --text: #e8eaed;
+      --text-secondary: #a0a6b1;
+      --border: #33373f;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-text: #ffffff;
+      --success-bg: #0f2a1b;
+      --success-text: #6fd897;
+      --success-border: #1f4e33;
+      --error-bg: #2f1717;
+      --error-text: #f29a95;
+      --error-border: #55231f;
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px var(--shadow);
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 1.6rem;
+  }
+
+  p.desc {
+    margin: 0 0 32px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-text);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>고철 이미지 분석</h1>
+    <p class="desc">사진을 올리면 고철 종류를 분석해 드립니다.</p>
+    <a class="btn" href="/analyze">사진 분석하러 가기</a>
+  </div>
+</body>
+</html>

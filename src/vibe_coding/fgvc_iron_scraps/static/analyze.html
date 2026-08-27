@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사진 분석 - 고철 이미지 분석</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card-bg: #ffffff;
+    --text: #1a1d21;
+    --text-secondary: #5f6673;
+    --border: #e1e4e8;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-text: #ffffff;
+    --success-bg: #e6f6ec;
+    --success-text: #146c2e;
+    --success-border: #a8dfb9;
+    --error-bg: #fdecec;
+    --error-text: #b3261e;
+    --error-border: #f3b4b0;
+    --shadow: rgba(0, 0, 0, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --card-bg: #1e2126;
+      --text: #e8eaed;
+      --text-secondary: #a0a6b1;
+      --border: #33373f;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-text: #ffffff;
+      --success-bg: #0f2a1b;
+      --success-text: #6fd897;
+      --success-border: #1f4e33;
+      --error-bg: #2f1717;
+      --error-text: #f29a95;
+      --error-border: #55231f;
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px var(--shadow);
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 1.6rem;
+  }
+
+  p.desc {
+    margin: 0 0 28px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .btn {
+    display: inline-block;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-text);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .field {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    font-size: 0.9rem;
+    color: var(--text);
+    max-width: 100%;
+  }
+
+  .preview-area {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .preview-img {
+    display: block;
+    max-width: 100%;
+    max-height: 260px;
+    margin: 0 auto 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    object-fit: contain;
+  }
+
+  .file-info {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    word-break: break-all;
+  }
+
+  .result {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+
+  .result-success {
+    background: var(--success-bg);
+    border-color: var(--success-border);
+    color: var(--success-text);
+  }
+
+  .result-error {
+    background: var(--error-bg);
+    border-color: var(--error-border);
+    color: var(--error-text);
+  }
+
+  .result-main {
+    margin: 0;
+    font-weight: 600;
+    word-break: break-word;
+  }
+
+  .result-meta {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    word-break: break-all;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .back-link:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>고철 이미지 분석</h1>
+    <p class="desc">고철 사진을 선택하면 미리보기가 표시됩니다. 확인 후 분석하기를 눌러주세요.</p>
+
+    <div class="field">
+      <input type="file" id="file-input" accept="image/*">
+    </div>
+
+    <div id="preview-area" class="preview-area" hidden>
+      <img id="preview-img" class="preview-img" alt="선택한 이미지 미리보기">
+      <p id="file-info" class="file-info"></p>
+    </div>
+
+    <button type="button" id="submit-btn" class="btn" disabled>분석하기</button>
+
+    <div id="result-area" class="result" hidden>
+      <p id="result-main" class="result-main"></p>
+      <p id="result-meta" class="result-meta" hidden></p>
+    </div>
+
+    <a class="back-link" href="/">← 대문으로 돌아가기</a>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var fileInput = document.getElementById("file-input");
+  var previewArea = document.getElementById("preview-area");
+  var previewImg = document.getElementById("preview-img");
+  var fileInfo = document.getElementById("file-info");
+  var submitBtn = document.getElementById("submit-btn");
+  var resultArea = document.getElementById("result-area");
+  var resultMain = document.getElementById("result-main");
+  var resultMeta = document.getElementById("result-meta");
+
+  var selectedFile = null;
+  var previewUrl = null;
+  var isSubmitting = false;
+
+  function formatBytes(bytes) {
+    if (typeof bytes !== "number" || isNaN(bytes) || bytes < 0) {
+      return "";
+    }
+    if (bytes < 1024) {
+      return bytes + " B";
+    }
+    if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(1) + " KB";
+    }
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  }
+
+  function clearResult() {
+    resultArea.hidden = true;
+    resultArea.className = "result";
+    resultMain.textContent = "";
+    resultMeta.textContent = "";
+    resultMeta.hidden = true;
+  }
+
+  function showResult(success, mainText, metaText) {
+    resultArea.hidden = false;
+    resultArea.className = "result " + (success ? "result-success" : "result-error");
+    resultMain.textContent = mainText;
+    if (metaText) {
+      resultMeta.textContent = metaText;
+      resultMeta.hidden = false;
+    } else {
+      resultMeta.textContent = "";
+      resultMeta.hidden = true;
+    }
+  }
+
+  function updateSubmitState() {
+    submitBtn.disabled = !selectedFile || isSubmitting;
+  }
+
+  fileInput.addEventListener("change", function () {
+    clearResult();
+
+    var file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      previewUrl = null;
+    }
+
+    if (!file) {
+      selectedFile = null;
+      previewArea.hidden = true;
+      previewImg.src = "";
+      fileInfo.textContent = "";
+      updateSubmitState();
+      return;
+    }
+
+    selectedFile = file;
+    previewUrl = URL.createObjectURL(file);
+    previewImg.src = previewUrl;
+
+    var sizeText = formatBytes(file.size);
+    fileInfo.textContent = sizeText ? (file.name + " · " + sizeText) : file.name;
+    previewArea.hidden = false;
+
+    updateSubmitState();
+  });
+
+  submitBtn.addEventListener("click", function () {
+    if (!selectedFile || isSubmitting) {
+      return;
+    }
+
+    isSubmitting = true;
+    fileInput.disabled = true;
+    submitBtn.textContent = "분석 중…";
+    updateSubmitState();
+    clearResult();
+
+    var formData = new FormData();
+    formData.append("file", selectedFile);
+
+    function finishSubmitting() {
+      isSubmitting = false;
+      fileInput.disabled = false;
+      submitBtn.textContent = "분석하기";
+      updateSubmitState();
+    }
+
+    fetch("/api/analyze", {
+      method: "POST",
+      body: formData
+    }).then(function (response) {
+      response.json().then(function (data) {
+        handleResponse(response, data);
+        finishSubmitting();
+      }, function () {
+        showResult(false, "❌ 서버 응답을 이해할 수 없어요 (" + response.status + ")", "");
+        finishSubmitting();
+      });
+    }, function () {
+      showResult(false, "❌ 서버에 연결할 수 없어요", "");
+      finishSubmitting();
+    });
+  });
+
+  function handleResponse(response, data) {
+    if (response.ok) {
+      var message = data && typeof data.message === "string" ? data.message : "분석이 완료됐어요";
+      var metaParts = [];
+      if (data && typeof data.filename === "string" && data.filename) {
+        metaParts.push(data.filename);
+      }
+      if (data && typeof data.size === "number") {
+        var sizeText = formatBytes(data.size);
+        if (sizeText) {
+          metaParts.push(sizeText);
+        }
+      }
+      showResult(true, "✅ " + message, metaParts.join(" · "));
+      return;
+    }
+
+    var detail = data && data.detail;
+    if (typeof detail !== "string" || !detail) {
+      detail = "알 수 없는 오류가 발생했어요";
+    }
+    showResult(false, "❌ " + detail + " (" + response.status + ")", "");
+  }
+})();
+</script>
+</body>
+</html>

@@ -10,9 +10,18 @@
 
 ```bash
 uv sync                             # 의존성 설치 (Python 3.13)
-uv run pytest                       # 테스트 39개
+uv run pytest                       # 테스트 67개
 uv run python -m vibe_coding.stats  # 이번 달 커밋 통계 출력
 ```
+
+고철 이미지 분석 웹페이지는 터미널 두 개가 필요하다. 더미 AI를 먼저 띄운다.
+
+```bash
+uv run uvicorn vibe_coding.fgvc_iron_scraps.dummy_ai:app --port 9000  # 더미 AI
+uv run uvicorn vibe_coding.fgvc_iron_scraps.hub:app --port 8000       # 허브
+```
+
+허브가 뜨면 `http://127.0.0.1:8000` 을 연다.
 
 ## 실습한 Claude Code 기능
 
@@ -20,7 +29,7 @@ uv run python -m vibe_coding.stats  # 이번 달 커밋 통계 출력
 
 | 기능 | 위치 | 무엇을 해봤나 |
 |---|---|---|
-| 서브에이전트 | `.claude/agents/` | `unit-test-writer`·`edge-case-test-writer`·`code-reviewer` 3개. 해피패스와 엣지케이스를 서로 다른 에이전트에 맡겨 나눠 작성 |
+| 서브에이전트 | `.claude/agents/` | `unit-test-writer`·`edge-case-test-writer`·`code-reviewer`·`change-reviewer`·`web-ui-writer` 5개. 해피패스와 엣지케이스를 서로 다른 에이전트에 맡겨 나눠 작성하고, 화면(HTML) 작성도 전용 에이전트에 위임 |
 | 스킬 | `.claude/skills/write-unit-tests/` | 테스트 컨벤션(한국어 docstring, 평면 함수 구조, 엣지케이스 모듈당 5개 제한)을 문서로 고정해 매번 설명하지 않게 함 |
 | 훅 | `.claude/hooks/` | `PreToolUse`로 테스트 없는 소스 편집을 거부하고, `PostToolUse`로 편집 직후 pytest를 돌려 Red/Green을 추적 |
 | 플러그인 | `plugins/tdd-python/` | 위 훅과 스킬을 플러그인으로 묶고, `.claude-plugin/marketplace.json`으로 로컬 마켓플레이스까지 구성 |
@@ -36,11 +45,12 @@ uv run python -m vibe_coding.stats  # 이번 달 커밋 통계 출력
 | `Calculator` | `src/vibe_coding/calc/` | 사칙연산. 첫 테스트 실습 대상 |
 | `Gugudan` | `src/vibe_coding/tt/` | 구구단. 스킬과 TDD 훅을 처음 적용해 만든 것 |
 | `GitStats` | `src/vibe_coding/stats/` | `git log`를 읽어 이번 달 작성자별·요일별 커밋 수를 출력. 달이 바뀌면 저장된 상태 없이 저절로 0부터 다시 센다 |
+| `ImageAnalyzer` | `src/vibe_coding/fgvc_iron_scraps/` | 사진을 검증해 AI API로 넘기는 분석기. FastAPI 웹페이지가 이 위에 얹혀 있다 — 자세한 내용은 [폴더 CLAUDE.md](src/vibe_coding/fgvc_iron_scraps/CLAUDE.md) |
 
 ## 구조
 
 ```
-src/vibe_coding/     소스 (calc, tt, stats)
+src/vibe_coding/     소스 (calc, tt, stats, fgvc_iron_scraps)
 tests/               test_<모듈>.py + test_<모듈>_edge_cases.py
 .claude/             에이전트·스킬·훅·설정
 plugins/tdd-python/  훅과 스킬을 묶은 플러그인
